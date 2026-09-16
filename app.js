@@ -1,16 +1,16 @@
 const products = [
-  { id: 1, name: "Martillo Carpintero", category: "Herramientas", price: 8990, icon: "🔨" },
-  { id: 2, name: "Taladro Percutor", category: "Herramientas", price: 39990, icon: "🛠️" },
-  { id: 3, name: "Juego Destornilladores", category: "Herramientas", price: 12990, icon: "🪛" },
-  { id: 4, name: "Cinta Métrica 5 m", category: "Herramientas", price: 5990, icon: "📏" },
-  { id: 5, name: "Pintura Interior", category: "Pintura", price: 24990, icon: "🎨" },
-  { id: 6, name: "Rodillo Profesional", category: "Pintura", price: 6990, icon: "🖌️" },
-  { id: 7, name: 'Brocha 3"', category: "Pintura", price: 3990, icon: "🖌️" },
-  { id: 8, name: "Tarugo + Tornillo", category: "Construcción", price: 990, icon: "🔩" },
-  { id: 9, name: "Guantes de Trabajo", category: "Seguridad", price: 2990, icon: "🧤" },
-  { id: 10, name: "Cable Eléctrico", category: "Electricidad", price: 15990, icon: "⚡" },
-  { id: 11, name: "Enchufe Doble", category: "Electricidad", price: 4490, icon: "🔌" },
-  { id: 12, name: "Llave de Paso", category: "Gasfitería", price: 5990, icon: "🔧" }
+  { id: 1, name: "Martillo Carpintero", category: "Herramientas", price: 8990, image: "img/martillo.webp" },
+  { id: 2, name: "Taladro Percutor", category: "Herramientas", price: 39990, image: "img/taladro.jpg" },
+  { id: 3, name: "Juego Destornilladores", category: "Herramientas", price: 12990, image: "img/destornilladores.webp" },
+  { id: 4, name: "Cinta Métrica 5 m", category: "Herramientas", price: 5990, image: "img/cinta-metrica.webp" },
+  { id: 5, name: "Pintura Interior", category: "Pintura", price: 24990, image: "img/pintura-interior.webp" },
+  { id: 6, name: "Rodillo Profesional", category: "Pintura", price: 6990, image: "img/rodillo.webp" },
+  { id: 7, name: 'Brocha 3"', category: "Pintura", price: 3990, image: "img/brocha.webp" },
+  { id: 8, name: "Tarugo + Tornillo", category: "Construcción", price: 990, image: "img/tarugo-tornillo.webp" },
+  { id: 9, name: "Guantes de Trabajo", category: "Seguridad", price: 2990, image: "img/guantes.webp" },
+  { id: 10, name: "Cable Eléctrico", category: "Electricidad", price: 15990, image: "img/cable-electrico.jpg" },
+  { id: 11, name: "Enchufe Doble", category: "Electricidad", price: 4490, image: "img/enchufe.jpg" },
+  { id: 12, name: "Llave de Paso", category: "Gasfitería", price: 5990, image: "img/llave-paso.webp" }
 ];
 
 const comparisons = [
@@ -33,7 +33,10 @@ function renderProducts() {
   const grid = document.getElementById("productGrid");
   grid.innerHTML = products.map(p => `
     <article class="product">
-      <div class="product-icon">${p.icon}</div>
+      <div class="product-image">
+        <img src="${p.image}" alt="${p.name}" loading="lazy"
+             onerror="this.src='img/placeholder.jpg'">
+      </div>
       <div class="product-body">
         <span class="product-tag">${p.category}</span>
         <h3>${p.name}</h3>
@@ -100,13 +103,26 @@ function renderBudget() {
     `).join("");
 
     list.querySelectorAll(".qty").forEach(input => {
-      input.addEventListener("change", () => {
-        const item = budget.find(x => x.id === Number(input.dataset.id));
-        const qty = Math.max(1, Number(input.value) || 1);
-        if (item) item.quantity = qty;
-        renderBudget();
-      });
-    });
+  input.addEventListener("change", () => {
+    const item = budget.find(x => x.id === Number(input.dataset.id));
+    let qty = parseInt(input.value, 10);
+
+    if (isNaN(qty) || qty < 1) {
+      qty = 1;
+    }
+
+    input.value = qty; // fuerza el valor correcto
+    if (item) item.quantity = qty;
+    renderBudget();
+  });
+
+  // Evita que escriban letras o decimales
+  input.addEventListener("keypress", (e) => {
+    if (e.key < "0" || e.key > "9") {
+      e.preventDefault();
+    }
+  });
+});
 
     list.querySelectorAll(".remove").forEach(btn => {
       btn.addEventListener("click", () => {
@@ -213,10 +229,16 @@ function printBudget() {
 
 document.getElementById("addProduct").addEventListener("click", () => {
   const id = Number(document.getElementById("productSelect").value);
-  const quantity = Math.max(1, Number(document.getElementById("quantityInput").value) || 1);
+  let quantity = parseInt(document.getElementById("quantityInput").value, 10);
+
+  // Solo permite números enteros positivos
+  if (isNaN(quantity) || quantity < 1) {
+    quantity = 1;
+  }
+
+  document.getElementById("quantityInput").value = quantity; // corrige el input
   addToBudget(id, quantity);
 });
-
 document.getElementById("sendBudget").addEventListener("click", sendBudget);
 document.getElementById("printBudget").addEventListener("click", printBudget);
 document.getElementById("clearBudget").addEventListener("click", () => {
